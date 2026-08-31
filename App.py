@@ -18,12 +18,12 @@ def conectar_banco():
 @st.cache_data
 def carregar_dados():
     connect = conectar_banco()
-    df = pd.read_sql_query('SELECT nome, area, periodo, situacao, total, aula, ensino, capacitacao, pesquisa, extensao, administracao, total_nao_homologado FROM rads, servidores where rads.siape = servidores.siape', connect)
+    df = pd.read_sql_query('SELECT nome, campus, area, periodo, situacao, total, aula, ensino, capacitacao, pesquisa, extensao, administracao, total_nao_homologado FROM rads, servidores where rads.siape = servidores.siape', connect)
     connect.close()
     return df
 
 df = carregar_dados()
-periodo = ['2024/2', '2024/1', '2023/2', '2023/1']
+periodo = ['2025/2', '2025/1', '2024/2', '2024/1', '2023/2', '2023/1']
 
 
 ################################################################################
@@ -111,9 +111,18 @@ def pontuacao_area_eixos(df):
 
 
 
-def selecao_periodo():
+def selecao_campus(df):
+    st.subheader('Seleção do campus')
+    campi = sorted(df['campus'].unique().tolist())
+    return st.selectbox('Selecione o campus', campi)
+
+def filtrar_campus(campus, df):
+    return df[df['campus'] == campus]
+
+def selecao_periodo(df):
     st.subheader('Seleção do período')
-    return st.selectbox('Selecione o período', periodo)
+    periodos_disponiveis = [p for p in periodo if p in df['periodo'].unique()]
+    return st.selectbox('Selecione o período', periodos_disponiveis)
 
 def filtrar_periodo(periodo, df):
     df_filtro = df[df['periodo'] == periodo]
@@ -124,7 +133,8 @@ def filtrar_periodo(periodo, df):
 ################################################################################
 carregar_logo()
 titulo()
-df_periodo = filtrar_periodo(selecao_periodo(), df)
+df_campus = filtrar_campus(selecao_campus(df), df)
+df_periodo = filtrar_periodo(selecao_periodo(df_campus), df_campus)
 st.dataframe(df_periodo)
 st.subheader('Pontuação total dos eixos: Aula; Administração/Representação; Ensino; Capacitação; Pesquisa; Extensão')
 pontuacao_total_eixos(df_periodo)

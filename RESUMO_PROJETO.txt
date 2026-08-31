@@ -1,0 +1,62 @@
+RESUMO DO PROJETO - publicacao_rad
+Gerado por Claude Code em 2026-08-31
+
+## O que é
+
+App Streamlit para IF Goiano - Campus Trindade, que publica online os RADs
+(Relatórios de Atividades Docentes) dos servidores do quadro docente, conforme
+Art. 26 do Regulamento de Atividades Docentes (publicação em até 10 dias após
+avaliação final).
+
+## Estrutura
+
+- App.py            -> app Streamlit principal (dashboard público)
+- rad_database.db    -> banco SQLite com os dados
+- export/
+  - create_table.py  -> cria schema (tabelas servidores e rads)
+  - populate_table.py-> importa .xlsx da pasta download/ e popula o banco
+  - delete_table.py  -> limpa as tabelas (DELETE FROM rads/servidores)
+- img/               -> logo usado no app
+- requirements.txt   -> só streamlit-option-menu==0.4.0 (faltam streamlit,
+                         pandas, altair, numpy, openpyxl como deps explícitas,
+                         embora sejam usadas)
+
+## Schema do banco
+
+servidores(siape PK, nome, campus, area)
+rads(id PK, periodo, situacao, total, aula, ensino, capacitacao, pesquisa,
+     extensao, administracao, total_nao_homologado, siape FK -> servidores)
+
+Os 6 eixos de pontuação são: aula, ensino, capacitacao, pesquisa, extensao,
+administracao.
+
+## Fluxo de dados
+
+1. Alguém exporta relatórios do sistema institucional para .xlsx e coloca em
+   download/ (pasta não versionada, não vista no repo).
+2. populate_table.py lê cada xlsx (pandas/openpyxl), extrai nome+siape via
+   regex do formato "Nome (SIAPE)", e insere em servidores/rads.
+3. App.py lê os dados via JOIN rads+servidores e exibe dashboard.
+
+## O que o App.py faz
+
+- Conecta no rad_database.db (cache_resource) e carrega dados com JOIN
+  (cache_data).
+- Mostra logo, título institucional e texto do artigo do regulamento.
+- Seletor de período (períodos fixos hardcoded: 2024/2, 2024/1, 2023/2, 2023/1
+  - não vêm do banco, então quebra se aparecer período novo fora dessa lista).
+- Tabela filtrada por período.
+- Gráfico de pizza + barras (Altair) com pontuação total por eixo.
+- Repete o gráfico e tabela separados por "área" (quadro por área).
+
+## Observações / riscos notados (não corrigidos, só observação)
+
+- populate_table.py monta SQL com f-strings interpolando dados do Excel
+  diretamente (SELECT/INSERT) em vez de usar parâmetros — risco de SQL
+  injection/erro de sintaxe se nome/siape tiver aspas. O INSERT final já usa
+  parâmetros (?), mas o SELECT de checagem e o primeiro INSERT não.
+- requirements.txt incompleto (faltam streamlit, pandas, altair, numpy,
+  openpyxl, sqlite3 é built-in).
+- Lista de períodos no App.py é hardcoded, não dinâmica a partir do banco.
+- pasta download/ referenciada em populate_table.py não existe no repo (deve
+  ser criada/local antes de rodar o import).
