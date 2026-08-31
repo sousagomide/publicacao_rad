@@ -7,7 +7,7 @@ from streamlit_option_menu import option_menu
 import base64
 
 st.set_page_config(
-    page_title='IF Goiano - Campus Trindade: Públicação dos RADS',
+    page_title='IF Goiano - Públicação dos RADS',
     layout='wide'
 )
 
@@ -30,7 +30,7 @@ periodo = ['2025/2', '2025/1', '2024/2', '2024/1', '2023/2', '2023/1']
 # Blocos
 ################################################################################
 def carregar_logo():
-    file_path = "img/logo.png"
+    file_path = "img/logo_geral.png"
     with open(file_path, "rb") as image_file:
         encoded = base64.b64encode(image_file.read()).decode()
     st.markdown(
@@ -46,7 +46,7 @@ def titulo():
     st.markdown(
         """
         <h2 style='text-align: center;'>
-            Plataforma de Publicação dos Relatórios de Atividades dos servidores do quadro docente do IF Goiano - Campus Trindade
+            Plataforma de Publicação dos Relatórios de Atividades dos servidores do quadro docente do IF Goiano
         </h2></br>
         Esta plataforma tem como objetivo disponibilizar os Relatórios de Atividades dos servidores do quadro docente, em conformidade com as determinações previstas no respectivo artigo.</br></br>
         <i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Art. 26. O Relatório de Atividades deverá ser publicado no site oficial
